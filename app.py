@@ -152,7 +152,9 @@ if uploaded_files:
         embedding=embeddings
     )
 
-    retriever = vectorstore.as_retriever()
+    retriever = vectorstore.as_retriever(
+    search_kwargs={"k": 10}
+)
 
     # ==============================================
     # Contextual Question Reformulation
