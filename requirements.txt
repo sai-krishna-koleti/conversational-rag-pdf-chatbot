@@ -4,10 +4,11 @@ langchain-community
 langchain-core
 langchain-groq
 langchain-huggingface
-langchain-chroma
-chromadb 
+langchain-chroma==1.1.0
+chromadb==1.5.9
 python-dotenv 
 pypdf
 langchain-classic
-sentence-transformers
+sentence-transformers==5.5.1
 torchvision
+protobuf==6.33.6
