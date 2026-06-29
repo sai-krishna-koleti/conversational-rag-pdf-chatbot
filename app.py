@@ -73,8 +73,7 @@ if "messages" not in st.session_state:
 # ==================================================
 
 embeddings = HuggingFaceEmbeddings(
-    # model_name="sentence-transformers/all-MiniLM-L6-v2"
-    model_name="deepseek-r1-distill-llama-70b"
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
 # ==================================================
@@ -83,7 +82,8 @@ embeddings = HuggingFaceEmbeddings(
 
 llm = ChatGroq(
     groq_api_key=GROQ_API_KEY,
-    model_name="llama-3.3-70b-versatile"
+    # model_name="llama-3.3-70b-versatile"
+    model_name="deepseek-r1-distill-llama-70b"
 )
 
 # ==================================================
