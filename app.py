@@ -166,6 +166,7 @@ if uploaded_files:
         "formulate a standalone question which can be "
         "understood without the chat history. "
         "Do NOT answer the question."
+        "Answer to the question only if it present in chat history or provided context"
     )
 
     contextualize_q_prompt = ChatPromptTemplate.from_messages(
