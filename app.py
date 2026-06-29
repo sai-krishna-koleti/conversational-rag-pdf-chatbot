@@ -73,7 +73,8 @@ if "messages" not in st.session_state:
 # ==================================================
 
 embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
+    # model_name="sentence-transformers/all-MiniLM-L6-v2"
+    model_name="deepseek-r1-distill-llama-70b"
 )
 
 # ==================================================
