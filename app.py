@@ -261,7 +261,6 @@ vectorstore = st.session_state.sessions[session_id]["vectorstore"]
 retriever = vectorstore.as_retriever(
     search_kwargs={"k": 10}
 )
-)
 
 
 # ============================================================
