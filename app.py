@@ -123,7 +123,7 @@ def get_session_history(session_id):
 if st.button("🗑️ New Chat"):
 
     if session_id in st.session_state.sessions:
-        del st.session_state.sessions[session_id]
+        del st.session_state.store[session_id]
 
     st.success("Conversation cleared.")
 
@@ -140,33 +140,11 @@ uploaded_files = st.file_uploader(
     accept_multiple_files=True,
 )
 
-session_exists = (
-    session_id in st.session_state.sessions
-    and st.session_state.sessions[session_id]["vectorstore"] is not None
-)
-
-if not uploaded_files and not session_exists:
+if not uploaded_files:
     st.info("Please upload one or more PDFs.")
     st.stop()
 
-# ============================================================
-# Restore Existing Session
-# ============================================================
 
-if session_exists and not uploaded_files:
-
-    session_data = st.session_state.sessions[session_id]
-
-    vectorstore = session_data["vectorstore"]
-
-    uploaded_file_names = session_data["uploaded_files"]
-
-    st.success("Previous session restored.")
-
-    st.subheader("Uploaded Documents")
-
-    for file in uploaded_file_names:
-        st.success(file)
 # ============================================================
 # Detect New Upload
 # ============================================================
@@ -191,38 +169,35 @@ if session_id not in st.session_state.sessions:
 elif st.session_state.sessions[session_id]["pdf_hash"] != current_hash:
 
     st.session_state.sessions[session_id] = {
-    "history": ChatMessageHistory(),
-    "vectorstore": vectorstore,
-    "pdf_hash": current_hash,
-    "uploaded_files": [file.name for file in uploaded_files],
-}
+        "history": ChatMessageHistory(),
+        "vectorstore": None,
+        "pdf_hash": current_hash,
+    }
 
 # ============================================================
 # Load PDFs
 # ============================================================
 
-if uploaded_files:
+documents = []
 
-    documents = []
+for uploaded_file in uploaded_files:
 
-    for uploaded_file in uploaded_files:
-        
-        temp_file = f"temp_{uuid.uuid4().hex}.pdf"
-    
-        with open(temp_file, "wb") as f:
-            f.write(uploaded_file.getvalue())
-    
-        loader = PyPDFLoader(temp_file)
-    
-        docs = loader.load()
-    
-        documents.extend(docs)
-    
-        os.remove(temp_file)
-    
-    if len(documents) == 0:
-        st.error("No text could be extracted from the uploaded PDFs.")
-        st.stop()
+    temp_file = f"temp_{uuid.uuid4().hex}.pdf"
+
+    with open(temp_file, "wb") as f:
+        f.write(uploaded_file.getvalue())
+
+    loader = PyPDFLoader(temp_file)
+
+    docs = loader.load()
+
+    documents.extend(docs)
+
+    os.remove(temp_file)
+
+if len(documents) == 0:
+    st.error("No text could be extracted from the uploaded PDFs.")
+    st.stop()
 
 # ============================================================
 # Add Metadata
