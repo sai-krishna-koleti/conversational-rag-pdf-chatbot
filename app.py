@@ -62,11 +62,23 @@ session_id = st.text_input(
     value="default_session"
 )
 
+if st.button("🗑️ New Chat"):
+
+    if session_id in st.session_state.store:
+        del st.session_state.store[session_id]
+
+    st.session_state.messages[session_id] = []
+
+    st.rerun()
+
 if "store" not in st.session_state:
     st.session_state.store = {}
 
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = {}
+
+if session_id not in st.session_state.messages:
+    st.session_state.messages[session_id] = []
 
 # ==================================================
 # Embeddings
@@ -107,6 +119,23 @@ uploaded_files = st.file_uploader(
     type="pdf",
     accept_multiple_files=True
 )
+
+# Detect new upload and clear previous chat
+current_files = None
+
+if uploaded_files:
+    current_files = tuple(file.name for file in uploaded_files)
+
+if "last_uploaded_files" not in st.session_state:
+    st.session_state.last_uploaded_files = current_files
+
+if current_files != st.session_state.last_uploaded_files:
+    st.session_state.messages = []
+
+    if session_id in st.session_state.store:
+        del st.session_state.store[session_id]
+
+    st.session_state.last_uploaded_files = current_files
 
 if uploaded_files:
 
@@ -225,7 +254,7 @@ if uploaded_files:
     # Display Existing Messages
     # ==============================================
 
-    for message in st.session_state.messages:
+    for message in st.session_state.messages[session_id]:
 
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
@@ -238,7 +267,7 @@ if uploaded_files:
         "Ask a question about the uploaded PDFs..."
     ):
 
-        st.session_state.messages.append(
+        st.session_state.messages[session_id].append(
             {
                 "role": "user",
                 "content": prompt
@@ -262,7 +291,7 @@ if uploaded_files:
         with st.chat_message("assistant"):
             st.markdown(answer)
 
-        st.session_state.messages.append(
+        st.session_state.messages[session_id].append(
             {
                 "role": "assistant",
                 "content": answer
