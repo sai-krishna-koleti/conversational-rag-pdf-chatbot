@@ -82,8 +82,7 @@ embeddings = HuggingFaceEmbeddings(
 
 llm = ChatGroq(
     groq_api_key=GROQ_API_KEY,
-    # model_name="llama-3.3-70b-versatile"
-    model_name="deepseek-r1-distill-llama-70b"
+    model_name="llama-3.3-70b-versatile"
 )
 
 # ==================================================
