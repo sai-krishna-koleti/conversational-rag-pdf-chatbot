@@ -92,8 +92,8 @@ session_id = st.text_input(
     value="default_session",
 )
 
-if "store" not in st.session_state:
-    st.session_state.store = {}
+if "sessions" not in st.session_state:
+    st.session_state.sessions = {}
 
 if "last_pdf_hash" not in st.session_state:
     st.session_state.last_pdf_hash = None
@@ -103,14 +103,17 @@ if "last_pdf_hash" not in st.session_state:
 # Chat History
 # ============================================================
 
-def get_session_history(
-    session: str,
-) -> BaseChatMessageHistory:
+def get_session_history(session_id):
 
-    if session not in st.session_state.store:
-        st.session_state.store[session] = ChatMessageHistory()
+    if session_id not in st.session_state.sessions:
 
-    return st.session_state.store[session]
+        st.session_state.sessions[session_id] = {
+            "history": ChatMessageHistory(),
+            "vectorstore": None,
+            "pdf_hash": None,
+        }
+
+    return st.session_state.sessions[session_id]["history"]
 
 
 # ============================================================
@@ -119,7 +122,7 @@ def get_session_history(
 
 if st.button("🗑️ New Chat"):
 
-    if session_id in st.session_state.store:
+    if session_id in st.session_state.sessions:
         del st.session_state.store[session_id]
 
     st.success("Conversation cleared.")
@@ -154,13 +157,22 @@ for file in uploaded_files:
 
 current_hash = pdf_hash.hexdigest()
 
-if st.session_state.last_pdf_hash != current_hash:
 
-    st.session_state.last_pdf_hash = current_hash
+if session_id not in st.session_state.sessions:
 
-    if session_id in st.session_state.store:
-        del st.session_state.store[session_id]
+    st.session_state.sessions[session_id] = {
+        "history": ChatMessageHistory(),
+        "vectorstore": None,
+        "pdf_hash": None,
+    }
 
+elif st.session_state.sessions[session_id]["pdf_hash"] != current_hash:
+
+    st.session_state.sessions[session_id] = {
+        "history": ChatMessageHistory(),
+        "vectorstore": None,
+        "pdf_hash": current_hash,
+    }
 
 # ============================================================
 # Load PDFs
@@ -231,10 +243,24 @@ vectorstore = Chroma.from_documents(
     embedding=embeddings,
 )
 
-retriever = vectorstore.as_retriever(
-    search_kwargs={
-        "k": 10,
+if session_id not in st.session_state.sessions:
+
+    st.session_state.sessions[session_id] = {
+        "history": ChatMessageHistory(),
+        "vectorstore": vectorstore,
+        "pdf_hash": current_hash,
     }
+
+else:
+
+    st.session_state.sessions[session_id]["vectorstore"] = vectorstore
+    st.session_state.sessions[session_id]["pdf_hash"] = current_hash
+    
+vectorstore = st.session_state.sessions[session_id]["vectorstore"]
+
+retriever = vectorstore.as_retriever(
+    search_kwargs={"k": 10}
+)
 )
 
 
