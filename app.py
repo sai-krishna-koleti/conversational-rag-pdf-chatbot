@@ -123,7 +123,7 @@ def get_session_history(session_id):
 if st.button("🗑️ New Chat"):
 
     if session_id in st.session_state.sessions:
-        del st.session_state.store[session_id]
+        del st.session_state.sessions[session_id]
 
     st.success("Conversation cleared.")
 
